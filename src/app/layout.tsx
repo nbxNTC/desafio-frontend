@@ -3,6 +3,7 @@ import { Roboto } from 'next/font/google'
 import './globals.css'
 
 import { Header } from '@/components/layout/header'
+import { SearchHistoryProvider } from '@/contexts/SearchHistoryContext'
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -43,8 +44,10 @@ export default async function RootLayout({
   return (
     <html lang='en' className={roboto.variable}>
       <body className='antialiased'>
-        <Header />
-        {children}
+        <SearchHistoryProvider>
+          <Header />
+          {children}
+        </SearchHistoryProvider>
       </body>
     </html>
   )

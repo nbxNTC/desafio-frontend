@@ -5,11 +5,6 @@ import Link from 'next/link'
 import { SearchBar, Button } from '@/components/ui'
 
 export function Header() {
-  const handleSearch = (query: string) => {
-    console.log('Searching for:', query)
-    // TODO: Implementar navegação e busca usando Context API
-  }
-
   return (
     <header className='sticky top-0 z-50 w-full bg-white'>
       <div className='flex h-14 items-center justify-between gap-4 px-5'>
@@ -29,7 +24,7 @@ export function Header() {
 
         {/* Barra de Busca */}
         <div className='mx-auto flex max-w-2xl flex-1 justify-center'>
-          <SearchBar onSearch={handleSearch} placeholder='Search' className='w-full' />
+          <SearchBar />
         </div>
 
         {/* Botões de Login e Cadastro */}
