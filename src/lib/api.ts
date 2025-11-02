@@ -1,47 +1,64 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosInstance } from 'axios'
+import { log } from '@/utils/logger'
 
-// Types for proxy methods
-type ApiProxyMethod = <T = any>(
-  path: string,
-  data?: any,
-  config?: AxiosRequestConfig
-) => Promise<AxiosResponse<T>>
+/**
+ * YouTube API configuration
+ * This service is designed to run on the server-side (SSR)
+ */
+const YOUTUBE_API_BASE_URL = process.env.YOUTUBE_API_BASE_URL
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY
 
-const createProxyRequest = (method: string): ApiProxyMethod => {
-  return async <T = any>(
-    path: string,
-    data?: any,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>> => {
-    return await axios.request({
-      ...config,
-      method,
-      url: '/api',
-      timeout: 30000,
-      headers: {
-        'Content-Type': 'application/json',
-        ...config?.headers
-      },
-      params: { path, ...config?.params },
-      data
-    })
+if (!YOUTUBE_API_KEY) {
+  log({
+    severity: 'warn',
+    context: 'YouTube API Configuration',
+    message: 'YOUTUBE_API_KEY is not configured in environment variables'
+  })
+}
+
+/**
+ * Axios instance configured to access YouTube API directly
+ * Should only be used in server-side code (Server Components, Server Actions, API Routes)
+ */
+export const youtubeApi: AxiosInstance = axios.create({
+  baseURL: YOUTUBE_API_BASE_URL,
+  timeout: 30000, // 30 seconds timeout
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json'
+  },
+  params: {
+    key: YOUTUBE_API_KEY
   }
-}
+})
 
-// Interface for the apiProxy object
-interface ApiProxy {
-  get: ApiProxyMethod
-  post: ApiProxyMethod
-  put: ApiProxyMethod
-  patch: ApiProxyMethod
-  delete: ApiProxyMethod
-}
-
-// Convenience methods to use the proxy
-export const apiProxy: ApiProxy = {
-  get: createProxyRequest('GET'),
-  post: createProxyRequest('POST'),
-  put: createProxyRequest('PUT'),
-  patch: createProxyRequest('PATCH'),
-  delete: createProxyRequest('DELETE')
-}
+/**
+ * Axios interceptor to handle YouTube API errors
+ */
+youtubeApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.data?.error) {
+      // YouTube API error format
+      const apiError = error.response.data.error
+      log({
+        severity: 'error',
+        context: 'YouTube API',
+        message: apiError.message,
+        payload: {
+          code: apiError.code,
+          errors: apiError.errors
+        }
+      })
+    } else {
+      // Generic error (network, timeout, etc)
+      log({
+        severity: 'error',
+        context: 'YouTube API',
+        message: error.message,
+        stack: error.stack
+      })
+    }
+    return Promise.reject(error)
+  }
+)

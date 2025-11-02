@@ -37,7 +37,7 @@ O layout da **home** não precisa ser exatamente como o do wireframe. Você pode
 - [ ] Fornecer uma estrutura de gerência do estado da aplicação
 - [ ] Possuir histórico das buscas realizadas (persistir localmente)
 
-**Requisitos extras** 
+**Requisitos extras**
 
 - [ ] Permitir cadastro de usuário / login através da API do YouTube + OAuth2
 - [ ] Permitir upload de vídeo para a API do YouTube

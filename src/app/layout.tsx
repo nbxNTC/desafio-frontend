@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 import './globals.css'
 
+import { Header } from '@/components/layout/header'
+
 const roboto = Roboto({
   subsets: ['latin'],
   weight: ['300', '400', '500', '700'],
@@ -18,7 +20,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://your-domain.com',
     title: 'YouTube Clone - Video Platform',
     description: 'Watch, search, and discover videos with our YouTube-inspired platform.',
     siteName: 'YouTube Clone'
@@ -29,7 +30,8 @@ export const metadata: Metadata = {
     description: 'Watch, search, and discover videos with our YouTube-inspired platform.'
   },
   icons: {
-    icon: '/favicon.ico'
+    icon: '/youtube-icon.svg',
+    apple: '/youtube-icon.svg'
   }
 }
 
@@ -40,7 +42,10 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang='en' className={roboto.variable}>
-      <body className='antialiased'>{children}</body>
+      <body className='antialiased'>
+        <Header />
+        {children}
+      </body>
     </html>
   )
 }

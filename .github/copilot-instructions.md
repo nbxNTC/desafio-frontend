@@ -82,4 +82,10 @@ Siga estes padrões para implementar a stack obrigatória:
   - Use TypeScript de forma efetiva com tipos bem definidos.
   - Adicione testes se possível (Cypress já está configurado).
 
+- **Idioma e Nomenclatura:**
+  - **Todos os comentários no código devem ser escritos em inglês.**
+  - **Todos os nomes de componentes, funções, variáveis e tipos devem estar em inglês.**
+  - **Todos os textos de interface, validações e mensagens de erro devem estar em inglês.**
+  - Mantenha consistência linguística em toda a aplicação.
+
 ---
