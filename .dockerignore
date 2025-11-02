@@ -1,0 +1,24 @@
+# docker files
+Dockerfile
+Dockerfile.prod
+.dockerignore
+docker
+
+# dependencies
+node_modules
+
+# next.js
+.next
+
+# testing
+cypress
+coverage
+
+# debug
+npm-debug.log
+
+# documentation
+README.md
+
+# version control
+.git

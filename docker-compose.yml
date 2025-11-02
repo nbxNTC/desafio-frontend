@@ -1,0 +1,13 @@
+services:
+  desafio-frontend:
+    container_name: desafio-frontend
+    image: desafio-frontend:latest
+    build: .
+    working_dir: /code
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/code
+      - ./node_modules:/code/node_modules:cached
+    ports:
+      - "${EXTERNAL_PORT:-85}:${PORT:-3000}"
