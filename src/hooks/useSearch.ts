@@ -1,17 +1,15 @@
-import { searchVideos } from '@/services/search'
+import { youtubeService } from '@/services/youtube'
 import { YouTubeSearchListResponse } from '@/types/youtube'
 import { log } from '@/utils/logger'
 
 export async function useSearch(
   query: string,
-  maxResults: number = 12
-): Promise<YouTubeSearchListResponse | null> {
-  if (!query.trim()) {
-    return null
-  }
+  maxResults: number
+): Promise<YouTubeSearchListResponse | undefined> {
+  if (!query.trim()) return
 
   try {
-    const results = await searchVideos(query, maxResults)
+    const results = await youtubeService.searchVideos(query, maxResults)
     return results
   } catch (error) {
     log({

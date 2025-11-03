@@ -1,13 +1,8 @@
-export { Button } from './button'
-export { Input } from './input'
-export { SearchBar } from './search-bar'
-export { Textarea } from './textarea'
-export { VideoCard } from './video-card'
-export {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupText,
-  InputGroupInput,
-  InputGroupTextarea
-} from './input-group'
+export * from './button'
+export * from './input'
+export * from './input-group'
+export * from './textarea'
+export * from './search-bar'
+export * from './popover'
+export * from './video-card'
+export * from './video-section'

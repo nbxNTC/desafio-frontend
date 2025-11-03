@@ -20,7 +20,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   }
 
   try {
-    const data = await useSearch(query)
+    const data = await useSearch(query, 12)
 
     if (!data || data.items.length === 0) {
       return (

@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
+import { formatDateToBRT } from '@/utils/dateFormatter'
 
 interface VideoCardProps {
   videoId: string
@@ -49,13 +50,7 @@ export function VideoCard({
         {channelTitle && <p className='text-xs text-gray-600 dark:text-gray-400'>{channelTitle}</p>}
 
         {publishedAt && (
-          <p className='text-xs text-gray-500 dark:text-gray-500'>
-            {new Date(publishedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })}
-          </p>
+          <p className='text-xs text-gray-500 dark:text-gray-500'>{formatDateToBRT(publishedAt)}</p>
         )}
       </div>
     </div>

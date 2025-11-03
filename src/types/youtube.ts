@@ -74,3 +74,41 @@ export interface YouTubeSearchParams {
   videoSyndicated?: 'any' | 'true'
   videoType?: 'any' | 'episode' | 'movie'
 }
+
+// YouTube Videos API Types
+export interface YouTubeVideoSnippet {
+  publishedAt: string
+  channelId: string
+  title: string
+  description: string
+  thumbnails: YouTubeThumbnails
+  channelTitle: string
+  tags?: string[]
+  categoryId: string
+  liveBroadcastContent: 'upcoming' | 'live' | 'none'
+  defaultLanguage?: string
+  localized?: {
+    title: string
+    description: string
+  }
+  defaultAudioLanguage?: string
+}
+
+export interface YouTubeVideo {
+  kind: 'youtube#video'
+  etag: string
+  id: string
+  snippet: YouTubeVideoSnippet
+}
+
+export interface YouTubeVideosListResponse {
+  kind: 'youtube#videoListResponse'
+  etag: string
+  nextPageToken?: string
+  prevPageToken?: string
+  pageInfo: {
+    totalResults: number
+    resultsPerPage: number
+  }
+  items: YouTubeVideo[]
+}
