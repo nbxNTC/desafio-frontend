@@ -14,7 +14,7 @@ const roboto = Roboto({
 })
 
 export const metadata: Metadata = {
-  title: 'YouTube Clone - Video Platform',
+  title: 'YouTube Clone',
   description:
     'Watch, search, and discover videos with our YouTube-inspired platform. Built with Next.js, TypeScript, and YouTube Data API v3.',
   keywords: ['youtube', 'videos', 'streaming', 'video platform', 'watch videos', 'video search'],
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    title: 'YouTube Clone - Video Platform',
+    title: 'YouTube Clone',
     description: 'Watch, search, and discover videos with our YouTube-inspired platform.',
     siteName: 'YouTube Clone'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'YouTube Clone - Video Platform',
+    title: 'YouTube Clone',
     description: 'Watch, search, and discover videos with our YouTube-inspired platform.'
   },
   icons: {

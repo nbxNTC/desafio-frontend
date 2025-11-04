@@ -66,6 +66,7 @@ export function VideoSection({ title, description, data }: VideoSectionProps) {
             onClick={() => setShowAll(true)}
             variant='outline'
             className='px-8 py-2 text-sm font-medium'
+            data-cy='video-section-show-more-button'
           >
             Show more ({data.items.length - INITIAL_DISPLAY_COUNT} more videos)
           </Button>

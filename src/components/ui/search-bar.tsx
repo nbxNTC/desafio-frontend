@@ -64,7 +64,7 @@ export function SearchBar() {
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <div className='relative flex w-full max-w-2xl'>
-        <form onSubmit={handleSubmit} className='flex w-full'>
+        <form onSubmit={handleSubmit} data-cy='search-form' className='flex w-full'>
           <PopoverTrigger asChild>
             <InputGroup className='h-10 rounded-l-full'>
               <InputGroupInput
@@ -73,6 +73,7 @@ export function SearchBar() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder='Search'
                 className='pl-4'
+                data-cy='search-input'
               />
 
               {query && (
@@ -84,6 +85,7 @@ export function SearchBar() {
                     size='icon-xs'
                     onClick={handleClear}
                     aria-label='Clear search'
+                    data-cy='search-clear-button'
                   >
                     <svg
                       className='h-4 w-4'
@@ -110,6 +112,7 @@ export function SearchBar() {
             variant='outline'
             size='icon'
             className='h-10 cursor-pointer rounded-l-none rounded-r-full border-l-0 px-8 hover:bg-gray-100 dark:hover:bg-gray-800'
+            data-cy='search-submit-button'
           >
             <svg
               className='h-5 w-5'
@@ -135,6 +138,7 @@ export function SearchBar() {
             className='w-(--radix-popover-trigger-width) p-0'
             align='start'
             sideOffset={4}
+            data-cy='search-history-popover'
           >
             <div className='max-h-80 overflow-y-auto py-2'>
               {history.map((historyQuery, index) => (
@@ -142,6 +146,7 @@ export function SearchBar() {
                   key={`${historyQuery}-${index}`}
                   className='group flex cursor-pointer items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800'
                   onClick={() => handleHistoryItemClick(historyQuery)}
+                  data-cy='search-history-item'
                 >
                   <div className='flex items-center gap-3'>
                     <svg
@@ -167,6 +172,7 @@ export function SearchBar() {
                     onClick={(e) => handleRemoveHistoryItem(historyQuery, e)}
                     className='cursor-pointer transition-opacity group-hover:opacity-100 sm:opacity-0'
                     aria-label='Remove from history'
+                    data-cy='search-history-remove-button'
                   >
                     <svg
                       className='h-4 w-4'

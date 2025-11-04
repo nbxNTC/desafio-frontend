@@ -10,7 +10,11 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "test": "cypress run && cypress run --component",
-    "test:open": "cypress open"
+    "test:open": "cypress open",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open --e2e",
+    "test:component": "cypress run --component",
+    "test:component:open": "cypress open --component"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",

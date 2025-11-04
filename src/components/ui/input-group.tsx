@@ -96,14 +96,16 @@ function InputGroupButton({
   type = 'button',
   variant = 'ghost',
   size = 'xs',
+  'data-cy': dataCy,
   ...props
 }: Omit<React.ComponentProps<typeof Button>, 'size'> &
-  VariantProps<typeof inputGroupButtonVariants>) {
+  VariantProps<typeof inputGroupButtonVariants> & { 'data-cy'?: string }) {
   return (
     <Button
       type={type}
       data-size={size}
       variant={variant}
+      data-cy={dataCy}
       className={cn(inputGroupButtonVariants({ size }), className)}
       {...props}
     />
@@ -122,10 +124,15 @@ function InputGroupText({ className, ...props }: React.ComponentProps<'span'>) {
   )
 }
 
-function InputGroupInput({ className, ...props }: React.ComponentProps<'input'>) {
+function InputGroupInput({
+  className,
+  'data-cy': dataCy,
+  ...props
+}: React.ComponentProps<'input'> & { 'data-cy'?: string }) {
   return (
     <Input
       data-slot='input-group-control'
+      data-cy={dataCy}
       className={cn(
         'flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent',
         className

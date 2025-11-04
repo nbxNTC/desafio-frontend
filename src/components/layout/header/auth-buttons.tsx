@@ -16,11 +16,16 @@ export function AuthButtons() {
 
   return (
     <>
-      <Button variant='ghost' size='sm' onClick={handleSignIn}>
+      <Button variant='ghost' size='sm' onClick={handleSignIn} data-cy='auth-sign-in-button'>
         Sign-in
       </Button>
 
-      <Button variant='outline' size='sm' onClick={handleSignIn}>
+      <Button
+        variant='outline'
+        size='sm'
+        onClick={handleSignIn}
+        data-cy='auth-create-account-button'
+      >
         <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
           <path
             strokeLinecap='round'

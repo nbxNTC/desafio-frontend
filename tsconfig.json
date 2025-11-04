@@ -33,7 +33,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "cypress.config.ts",
+    "cypress/**/*.ts",
+    "cypress/**/*.tsx"
   ],
   "exclude": [
     "node_modules"

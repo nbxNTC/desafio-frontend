@@ -24,13 +24,17 @@ export function VideoCard({
 }: VideoCardProps) {
   return (
     <div
+      data-cy='video-card'
       className={cn(
         'group cursor-pointer overflow-hidden rounded-lg transition-transform hover:scale-105',
         className
       )}
     >
       {/* Thumbnail */}
-      <div className='relative aspect-video w-full overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800'>
+      <div
+        data-cy='video-thumbnail'
+        className='relative aspect-video w-full overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800'
+      >
         <Image
           src={thumbnail}
           alt={title}
@@ -43,14 +47,23 @@ export function VideoCard({
 
       {/* Video Info */}
       <div className='mt-3 space-y-1'>
-        <h3 className='line-clamp-2 text-sm leading-tight font-semibold text-gray-900 dark:text-white'>
+        <h3
+          data-cy='video-title'
+          className='line-clamp-2 text-sm leading-tight font-semibold text-gray-900 dark:text-white'
+        >
           {title}
         </h3>
 
-        {channelTitle && <p className='text-xs text-gray-600 dark:text-gray-400'>{channelTitle}</p>}
+        {channelTitle && (
+          <p data-cy='video-channel' className='text-xs text-gray-600 dark:text-gray-400'>
+            {channelTitle}
+          </p>
+        )}
 
         {publishedAt && (
-          <p className='text-xs text-gray-500 dark:text-gray-500'>{formatDateToBRT(publishedAt)}</p>
+          <p data-cy='video-date' className='text-xs text-gray-500 dark:text-gray-500'>
+            {formatDateToBRT(publishedAt)}
+          </p>
         )}
       </div>
     </div>

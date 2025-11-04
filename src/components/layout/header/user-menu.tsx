@@ -30,6 +30,7 @@ export function UserMenu() {
           variant='ghost'
           size='icon-sm'
           className='relative overflow-hidden rounded-full p-0'
+          data-cy='user-menu-button'
         >
           {user?.picture ? (
             <Image src={user.picture} alt={user.name || 'User'} fill className='object-cover' />
