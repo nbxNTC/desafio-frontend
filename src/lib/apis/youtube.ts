@@ -6,13 +6,13 @@ import { log } from '@/utils/logger'
  * This service is designed to run on the server-side (SSR)
  */
 const YOUTUBE_API_BASE_URL = process.env.YOUTUBE_API_BASE_URL
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
 
-if (!YOUTUBE_API_KEY) {
+if (!GOOGLE_API_KEY) {
   log({
     severity: 'warn',
     context: 'YouTube API Configuration',
-    message: 'YOUTUBE_API_KEY is not configured in environment variables'
+    message: 'GOOGLE_API_KEY is not configured in environment variables'
   })
 }
 
@@ -28,7 +28,7 @@ export const youtubeApi: AxiosInstance = axios.create({
     'Content-Type': 'application/json'
   },
   params: {
-    key: YOUTUBE_API_KEY
+    key: GOOGLE_API_KEY
   }
 })
 

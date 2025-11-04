@@ -1,4 +1,4 @@
-import { youtubeApi } from '@/lib/api'
+import { youtubeApi } from '@/lib/apis/youtube'
 import { YouTubeSearchListResponse, YouTubeVideosListResponse } from '@/types/youtube'
 
 export const youtubeService = {

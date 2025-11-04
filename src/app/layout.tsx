@@ -4,6 +4,8 @@ import './globals.css'
 
 import { Header } from '@/components/layout/header'
 import { SearchHistoryProvider } from '@/contexts/SearchHistoryContext'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { getAuthSession } from '@/actions/auth'
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -41,13 +43,18 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Get initial auth session from server-side cookies
+  const initialSession = await getAuthSession()
+
   return (
     <html lang='en' className={roboto.variable}>
       <body className='antialiased'>
-        <SearchHistoryProvider>
-          <Header />
-          {children}
-        </SearchHistoryProvider>
+        <AuthProvider initialSession={initialSession}>
+          <SearchHistoryProvider>
+            <Header />
+            {children}
+          </SearchHistoryProvider>
+        </AuthProvider>
       </body>
     </html>
   )

@@ -165,7 +165,7 @@ export function SearchBar() {
                     variant='ghost'
                     size='icon-sm'
                     onClick={(e) => handleRemoveHistoryItem(historyQuery, e)}
-                    className='cursor-pointer opacity-0 transition-opacity group-hover:opacity-100'
+                    className='cursor-pointer transition-opacity group-hover:opacity-100 sm:opacity-0'
                     aria-label='Remove from history'
                   >
                     <svg
