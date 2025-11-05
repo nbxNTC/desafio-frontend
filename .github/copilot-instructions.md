@@ -31,6 +31,49 @@
 
 ---
 
+# CHECKLIST PARA DESENVOLVIMENTO DE NOVAS FEATURES
+
+Ao desenvolver qualquer nova funcionalidade, **SEMPRE** verifique os seguintes pontos:
+
+## 📋 Validação e Schemas
+- ✅ **Schemas Yup:** Se a feature envolve formulários ou validação de dados, crie schemas do Yup na pasta `/lib/form/schemas/` ou similar.
+
+## 🪝 Custom Hooks
+- ✅ **Hooks Personalizados:** Abstraia a lógica complexa dos componentes e páginas criando custom hooks na pasta `/hooks/`.
+  - Data fetching, manipulação de estado, side effects devem estar em hooks reutilizáveis.
+
+## 🔌 Services
+- ✅ **Services Layer:** Para chamadas de API ou lógica de negócio:
+  - Crie novos services na pasta `/services/` quando necessário.
+  - Ou adicione novas funções aos services já existentes para manter a organização.
+
+## 📝 TypeScript Types
+- ✅ **Tipos e Interfaces:** Sempre defina tipos adequados na pasta `/types/` para:
+  - Request/Response de APIs
+  - Tipos específicos de componentes
+  - Entidades de domínio
+
+## 🌐 API Configuration
+- ✅ **Configuração de APIs:** Se a feature usa uma nova API externa:
+  - Configure a instância do Axios em `/lib/apis/`
+  - Mantenha a configuração centralizada (baseURL, headers, interceptors)
+
+## 🔢 Constants
+- ✅ **Constantes:** Evite magic numbers/strings no código:
+  - Cadastre todas as constantes na pasta `/constants/`
+  - URLs, chaves de configuração, valores fixos devem estar centralizados
+
+## ⚛️ Component Architecture
+- ✅ **Server Components First:**
+  - **Preferência:** Use Server Components por padrão para melhor performance
+  - **Client Components:** Use `'use client'` **APENAS** quando necessário:
+    - Uso de Context API ou Providers
+    - Interatividade (onClick, onChange, etc)
+    - React Hooks (useState, useEffect, etc)
+    - Animações e bibliotecas client-side
+
+---
+
 # REQUISITOS OBRIGATÓRIOS
 
 O sucesso deste desafio depende de cumprir 100% dos seguintes requisitos.
