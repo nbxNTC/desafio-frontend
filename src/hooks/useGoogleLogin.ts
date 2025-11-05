@@ -1,3 +1,5 @@
+import { storeOAuthState } from '@/actions/auth'
+
 /**
  * YouTube API scopes
  */
@@ -22,17 +24,20 @@ function generateStateToken(): string {
  * @returns Function to initiate Google login flow
  */
 export function useGoogleLogin() {
-  const initiateLogin = () => {
+  const initiateLogin = async () => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID
+    const oAuthRedirectUrl = process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URL
 
-    if (!clientId) {
-      console.error('Google OAuth Client ID not found in environment variables')
+    if (!clientId || !oAuthRedirectUrl) {
+      console.error('Google OAuth Client ID or Redirect URL not found in environment variables')
       return
     }
 
     // Generate CSRF token
     const state = generateStateToken()
-    sessionStorage.setItem('oauth_state', state)
+
+    // Store state in cookie via server action
+    await storeOAuthState(state)
 
     // Build OAuth2 URL
     const redirectUri = window.location.origin
@@ -44,7 +49,7 @@ export function useGoogleLogin() {
       state
     })
 
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+    const authUrl = `${oAuthRedirectUrl}/auth?${params.toString()}`
 
     // Redirect to Google OAuth2
     window.location.href = authUrl

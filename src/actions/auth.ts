@@ -1,36 +1,46 @@
 'use server'
 
 import { cookies } from 'next/headers'
+import { peopleService } from '@/services/people'
+import { log } from '@/utils/logger'
+import { AUTH_COOKIE_NAME, OAUTH_STATE_COOKIE, COOKIE_OPTIONS } from '@/constants/auth'
+import type { AuthSession, OAuth2Response, UserInfo } from '@/types/auth'
 
-// Cookie configuration
-const AUTH_COOKIE_NAME = 'youtube_auth_session'
+/**
+ * Parse OAuth2 response from URL hash string
+ * @param hash - URL hash string (e.g., '#access_token=...')
+ */
+export async function parseOAuth2Hash(hash: string): Promise<OAuth2Response> {
+  const params = new URLSearchParams(hash.substring(1))
+  const expiresInStr = params.get('expires_in')
 
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/'
+  return {
+    accessToken: params.get('access_token') || undefined,
+    tokenType: params.get('token_type') || undefined,
+    expiresIn: expiresInStr ? parseInt(expiresInStr) : undefined,
+    scope: params.get('scope') || undefined,
+    state: params.get('state') || undefined,
+    error: params.get('error') || undefined,
+    errorDescription: params.get('error_description') || undefined
+  }
 }
 
-// Types
-interface AuthSession {
-  accessToken: string
-  tokenExpiresAt: number
-  user?: {
-    name: string
-    email: string
-    picture: string
-  }
+/**
+ * Verify OAuth2 state from stored value
+ * @param receivedState - State received from OAuth2 callback
+ * @param storedState - State stored before OAuth2 flow
+ */
+export async function verifyStateFromValue(
+  receivedState: string,
+  storedState: string | undefined
+): Promise<boolean> {
+  return storedState === receivedState
 }
 
 /**
  * Store authentication session in a single cookie
  */
-export async function storeAuthSession(
-  accessToken: string,
-  expiresIn: number,
-  userInfo?: { name: string; email: string; picture: string }
-) {
+export async function storeAuthSession(accessToken: string, expiresIn: number, userInfo: UserInfo) {
   const cookieStore = await cookies()
   const tokenExpiresAt = Date.now() + expiresIn * 1000
 
@@ -49,7 +59,7 @@ export async function storeAuthSession(
 /**
  * Update user info in the auth session cookie
  */
-export async function updateUserInfo(userInfo: { name: string; email: string; picture: string }) {
+export async function updateUserInfo(userInfo: UserInfo) {
   const cookieStore = await cookies()
   const authCookie = cookieStore.get(AUTH_COOKIE_NAME)
 
@@ -89,9 +99,7 @@ export async function getAuthSession() {
   const cookieStore = await cookies()
   const authCookie = cookieStore.get(AUTH_COOKIE_NAME)
 
-  if (!authCookie?.value) {
-    return null
-  }
+  if (!authCookie?.value) return
 
   try {
     const session: AuthSession = JSON.parse(authCookie.value)
@@ -99,30 +107,25 @@ export async function getAuthSession() {
     // Check if token is expired
     if (Date.now() >= session.tokenExpiresAt) {
       await clearAuthSession()
-      return null
+      return
     }
 
-    return {
-      isAuthenticated: true,
-      accessToken: session.accessToken,
-      tokenExpiresAt: session.tokenExpiresAt,
-      user: session.user || null
-    }
+    return session
   } catch {
     // Invalid session format, clear it
     await clearAuthSession()
-    return null
+    return
   }
 }
 
 /**
- * Fetch user profile from Google People API and update session
+ * Fetch user profile from Google People API
+ * @param accessToken - OAuth2 access token
  * @returns User profile information or null if failed
  */
-export async function fetchAndUpdateUserProfile() {
+export async function fetchUserProfile(accessToken: string) {
   try {
-    const { peopleService } = await import('@/services/people')
-    const profile = await peopleService.getMyProfile()
+    const profile = await peopleService.fetchUserProfile(accessToken)
 
     // Extract user info from profile
     const userInfo = {
@@ -133,12 +136,148 @@ export async function fetchAndUpdateUserProfile() {
 
     return userInfo
   } catch (error) {
-    const { log } = await import('@/utils/logger')
     log({
       severity: 'error',
-      context: 'fetchAndUpdateUserProfile',
+      context: 'fetchUserProfile',
       message: error instanceof Error ? error.message : 'Failed to fetch user profile'
     })
-    return null
+    return
   }
+}
+
+/**
+ * Handle complete OAuth2 authentication flow from hash
+ * Validates OAuth response, verifies state, fetches user profile
+ * @param hash - URL hash containing OAuth2 response
+ * @returns Authentication data or error
+ */
+export async function handleOAuth2Callback(hash: string) {
+  try {
+    const cookieStore = await cookies()
+
+    // Parse OAuth2 response from hash
+    const oauthResponse = await parseOAuth2Hash(hash)
+
+    // Handle OAuth errors
+    if (oauthResponse.error) {
+      log({
+        severity: 'error',
+        context: 'handleOAuth2Callback',
+        message: `OAuth2 error: ${oauthResponse.error} - ${oauthResponse.errorDescription}`
+      })
+
+      // Clear state cookie
+      cookieStore.delete(OAUTH_STATE_COOKIE)
+
+      return {
+        success: false,
+        error: oauthResponse.error,
+        errorDescription: oauthResponse.errorDescription
+      }
+    }
+
+    // Validate OAuth response
+    if (!oauthResponse.accessToken || !oauthResponse.expiresIn) {
+      log({
+        severity: 'error',
+        context: 'handleOAuth2Callback',
+        message: 'Invalid OAuth2 response: missing access token or expires_in'
+      })
+
+      // Clear state cookie
+      cookieStore.delete(OAUTH_STATE_COOKIE)
+
+      return {
+        success: false,
+        error: 'invalid_response',
+        errorDescription: 'Missing required OAuth2 parameters'
+      }
+    }
+
+    // Verify state to prevent CSRF attacks
+    if (oauthResponse.state) {
+      const storedState = cookieStore.get(OAUTH_STATE_COOKIE)?.value
+      const isStateValid = await verifyStateFromValue(oauthResponse.state, storedState)
+
+      if (!isStateValid) {
+        log({
+          severity: 'error',
+          context: 'handleOAuth2Callback',
+          message: 'State verification failed - possible CSRF attack'
+        })
+
+        // Clear state cookie
+        cookieStore.delete(OAUTH_STATE_COOKIE)
+
+        return {
+          success: false,
+          error: 'invalid_state',
+          errorDescription: 'State verification failed'
+        }
+      }
+    }
+
+    // Clear state cookie after verification
+    cookieStore.delete(OAUTH_STATE_COOKIE)
+
+    // Fetch user profile
+    const userInfo = await fetchUserProfile(oauthResponse.accessToken)
+
+    if (!userInfo) {
+      log({
+        severity: 'info',
+        context: 'handleOAuth2Callback',
+        message: 'Failed to fetch user profile, proceeding without user info'
+      })
+
+      return {
+        success: false,
+        error: 'user_info_unavailable',
+        errorDescription: 'User info not available'
+      }
+    }
+
+    log({
+      severity: 'info',
+      context: 'handleOAuth2Callback',
+      message: 'User authenticated successfully via OAuth2'
+    })
+
+    // Return successful authentication data
+    return {
+      success: true,
+      accessToken: oauthResponse.accessToken,
+      expiresIn: oauthResponse.expiresIn,
+      user: userInfo
+    }
+  } catch (error) {
+    log({
+      severity: 'error',
+      context: 'handleOAuth2Callback',
+      message: error instanceof Error ? error.message : 'Unexpected error during OAuth2 callback'
+    })
+
+    // Clear state cookie on error
+    const cookieStore = await cookies()
+    cookieStore.delete(OAUTH_STATE_COOKIE)
+
+    return {
+      success: false,
+      error: 'unexpected_error',
+      errorDescription: error instanceof Error ? error.message : 'Unexpected error occurred'
+    }
+  }
+}
+
+/**
+ * Store OAuth state in cookie for CSRF protection
+ * @param state - The OAuth state token to store
+ */
+export async function storeOAuthState(state: string) {
+  const cookieStore = await cookies()
+
+  cookieStore.set(OAUTH_STATE_COOKIE, state, {
+    ...COOKIE_OPTIONS,
+    maxAge: 60 * 10 // 10 minutes
+  })
 }

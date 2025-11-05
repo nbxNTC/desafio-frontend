@@ -1,34 +1,19 @@
 'use client'
 
-import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import { parseOAuth2Response, verifyState } from '@/utils/oauth'
+import { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
 import {
   storeAuthSession,
   updateUserInfo,
   clearAuthSession,
-  fetchAndUpdateUserProfile
+  handleOAuth2Callback
 } from '@/actions/auth'
-import { log } from '@/utils/logger'
+import type { AuthState, UserInfo } from '@/types/auth'
 
 // Types
-interface UserInfo {
-  name: string
-  email: string
-  picture: string
-}
-
-interface AuthState {
-  isAuthenticated: boolean
-  accessToken: string | null
-  tokenExpiresAt: number | null
-  user: UserInfo | null
-}
-
 type AuthAction =
   | {
       type: 'LOGIN'
-      payload: { accessToken: string; expiresIn: number; user?: UserInfo }
+      payload: { accessToken: string; expiresIn: number; user: UserInfo }
     }
   | { type: 'LOGOUT' }
   | { type: 'UPDATE_USER'; payload: UserInfo }
@@ -37,24 +22,16 @@ interface AuthContextValue extends AuthState {
   signOut: () => void
 }
 
-// Initial state
-const initialState: AuthState = {
-  isAuthenticated: false,
-  accessToken: null,
-  tokenExpiresAt: null,
-  user: null
-}
-
 // Reducer
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case 'LOGIN': {
       const expiresAt = Date.now() + action.payload.expiresIn * 1000
+
       const newState = {
-        isAuthenticated: true,
         accessToken: action.payload.accessToken,
         tokenExpiresAt: expiresAt,
-        user: action.payload.user || state.user
+        user: action.payload.user
       }
 
       // Store in cookies via server action
@@ -66,7 +43,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     case 'LOGOUT': {
       // Clear cookies via server action
       clearAuthSession()
-      return initialState
+      return {}
     }
 
     case 'UPDATE_USER': {
@@ -91,106 +68,50 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider')
   return context
 }
 
 interface AuthProviderProps {
   children: ReactNode
-  initialSession?: AuthState | null
+  initialSession?: AuthState
 }
 
 export function AuthProvider({ children, initialSession }: AuthProviderProps) {
-  const [state, dispatch] = useReducer(authReducer, initialSession || initialState)
-  const router = useRouter()
-  const pathname = usePathname()
+  const [state, dispatch] = useReducer(authReducer, initialSession || {})
 
-  // Handle OAuth2 callback
+  // Handle OAuth2 callback on mount
   useEffect(() => {
-    const handleOAuthCallback = async () => {
-      // Only process if we have a hash in the URL
-      if (!window.location.hash) return
+    const handleOAuth2 = async () => {
+      const hash = window.location.hash
 
-      try {
-        const response = parseOAuth2Response()
+      // Check if hash contains OAuth2 response
+      if (hash && hash.includes('access_token')) {
+        // Process OAuth2 callback
+        const result = await handleOAuth2Callback(hash)
 
-        // Check if this is an OAuth response
-        if (!response.accessToken && !response.error) return
+        // Clear hash from URL
+        window.history.replaceState(null, '', window.location.pathname + window.location.search)
 
-        // Handle errors
-        if (response.error) {
-          log({
-            severity: 'error',
-            context: 'AuthProvider',
-            message: `OAuth2 error: ${response.error} - ${response.errorDescription || 'No description'}`
-          })
-          window.history.replaceState(null, '', pathname)
-          return
-        }
-
-        // Verify state to prevent CSRF attacks
-        if (response.state && !verifyState(response.state)) {
-          log({
-            severity: 'error',
-            context: 'AuthProvider',
-            message: 'State verification failed - possible CSRF attack'
-          })
-          window.history.replaceState(null, '', pathname)
-          return
-        }
-
-        // Store access token if present
-        if (response.accessToken && response.expiresIn) {
+        if (result.success && result.accessToken && result.expiresIn && result.user) {
+          // Dispatch login action with OAuth2 data
           dispatch({
             type: 'LOGIN',
             payload: {
-              accessToken: response.accessToken,
-              expiresIn: response.expiresIn
+              accessToken: result.accessToken,
+              expiresIn: result.expiresIn,
+              user: result.user
             }
           })
-
-          log({
-            severity: 'info',
-            context: 'AuthProvider',
-            message: 'User authenticated successfully'
-          })
-
-          // Clean up URL hash
-          window.history.replaceState(null, '', pathname)
-
-          // Redirect to home if not already there
-          if (pathname !== '/') router.push('/')
-        }
-      } catch (error) {
-        log({
-          severity: 'error',
-          context: 'AuthProvider',
-          message: error instanceof Error ? error.message : 'Failed to process OAuth callback'
-        })
-      }
-    }
-
-    handleOAuthCallback()
-  }, [pathname, router])
-
-  // Fetch user profile on mount if authenticated
-  useEffect(() => {
-    const loadUserProfile = async () => {
-      if (state.isAuthenticated && state.accessToken) {
-        const userInfo = await fetchAndUpdateUserProfile()
-        if (userInfo) {
-          dispatch({
-            type: 'UPDATE_USER',
-            payload: userInfo
-          })
+        } else {
+          // Handle OAuth2 error
+          console.error('OAuth2 authentication failed:', result.error, result.errorDescription)
         }
       }
     }
 
-    loadUserProfile()
-  }, [state.isAuthenticated, state.accessToken])
+    handleOAuth2()
+  }, [])
 
   const signOut = async () => {
     dispatch({ type: 'LOGOUT' })

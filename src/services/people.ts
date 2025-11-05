@@ -8,14 +8,13 @@ import { Person } from '@/types/people'
 export const peopleService = {
   /**
    * Get authenticated user's profile information
-   * @param personFields - Fields to retrieve (comma-separated)
+   * @param accessToken - OAuth2 access token
    * @returns Promise with user's profile information
    */
-  async getMyProfile(): Promise<Person> {
+  async fetchUserProfile(accessToken: string): Promise<Person> {
     const response = await peopleApi.get<Person>('/people/me', {
-      params: {
-        personFields: 'names,emailAddresses,photos'
-      }
+      params: { personFields: 'names,emailAddresses,photos' },
+      headers: { Authorization: `Bearer ${accessToken}` }
     })
 
     return response.data

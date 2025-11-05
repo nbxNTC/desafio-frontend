@@ -9,11 +9,9 @@ import { AuthButtons } from './auth-buttons'
  * Conditionally renders user menu or auth buttons based on authentication status
  */
 export function UserSection() {
-  const { isAuthenticated } = useAuth()
+  const { user } = useAuth()
 
   return (
-    <div className='flex shrink-0 items-center gap-2'>
-      {isAuthenticated ? <UserMenu /> : <AuthButtons />}
-    </div>
+    <div className='flex shrink-0 items-center gap-2'>{user ? <UserMenu /> : <AuthButtons />}</div>
   )
 }

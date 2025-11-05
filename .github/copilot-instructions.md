@@ -4,6 +4,23 @@
 - **Foco:** Seguir estritamente os requisitos do README, equilibrando velocidade com código sênior e boas práticas.
 - **Stack:** Aderir 100% à stack definida nos requisitos técnicos obrigatórios.
 - **Restrições:** Não sugerir bibliotecas ou abordagens fora da stack obrigatória, nem criar arquivos markdown de documentação adicional. Atualizaremos somente o README.md conforme necessário.
+
+## ⚠️ REGRA CRÍTICA: ESCOPO DE ALTERAÇÕES
+
+**IMPORTANTE:** Altere APENAS o que foi EXPLICITAMENTE solicitado pelo usuário.
+
+- ❌ **NÃO faça alterações "extras"** ou "melhorias" não solicitadas
+- ❌ **NÃO remova arquivos** a menos que seja explicitamente pedido
+- ❌ **NÃO refatore código** que não foi mencionado na solicitação
+- ❌ **NÃO adicione funcionalidades** além do que foi pedido
+- ✅ **Faça SOMENTE** o que foi requisitado, nada mais, nada menos
+- ✅ **Pergunte** se tiver dúvidas sobre o escopo da alteração
+
+**Exemplo:**
+- Se pedirem para "ajustar a função X", ajuste APENAS a função X
+- Se pedirem para "mover código de A para B", mova APENAS o código especificado
+- Se pedirem para "adicionar validação no formulário", adicione APENAS essa validação
+
 ---
 
 # CONTEXTO DO PROJETO E OBJETIVO
