@@ -1,5 +1,10 @@
 import { youtubeApi } from '@/lib/apis/youtube'
-import { YouTubeSearchListResponse, YouTubeVideosListResponse } from '@/types/youtube'
+import {
+  YouTubeSearchListResponse,
+  YouTubeVideosListResponse,
+  YouTubeVideoUploadRequest,
+  YouTubeVideoUploadResponse
+} from '@/types/youtube'
 
 export const youtubeService = {
   /**
@@ -77,6 +82,40 @@ export const youtubeService = {
         pageToken
       }
     })
+
+    return response.data
+  },
+
+  /**
+   * Upload a video to YouTube
+   * @param videoFile - Video file to upload
+   * @param metadata - Video metadata (title, description, category, privacy status)
+   * @returns Promise with uploaded video information
+   */
+  async uploadVideo(
+    videoFile: File,
+    metadata: YouTubeVideoUploadRequest
+  ): Promise<YouTubeVideoUploadResponse> {
+    // Create form data with video metadata
+    const formData = new FormData()
+    formData.append('video', videoFile)
+    formData.append('snippet', JSON.stringify(metadata.snippet))
+    formData.append('status', JSON.stringify(metadata.status))
+
+    // Use the upload endpoint with resumable upload
+    const response = await youtubeApi.post<YouTubeVideoUploadResponse>(
+      'https://www.googleapis.com/upload/youtube/v3/videos',
+      formData,
+      {
+        params: {
+          part: 'snippet,status',
+          uploadType: 'multipart'
+        },
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    )
 
     return response.data
   }

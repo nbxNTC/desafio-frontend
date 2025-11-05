@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
-import { cookies } from 'next/headers'
 import { log } from '@/utils/logger'
+import { getAuthSession } from '@/actions/auth'
 
 /**
  * Google People API configuration
@@ -40,15 +40,8 @@ export const peopleApi: AxiosInstance = axios.create({
 peopleApi.interceptors.request.use(
   async (config) => {
     try {
-      const cookieStore = await cookies()
-      const authCookie = cookieStore.get('youtube_auth_session')
-
-      if (authCookie?.value) {
-        const session = JSON.parse(authCookie.value)
-        if (session.accessToken) {
-          config.headers.Authorization = `Bearer ${session.accessToken}`
-        }
-      }
+      const session = await getAuthSession()
+      if (session?.accessToken) config.headers.Authorization = `Bearer ${session.accessToken}`
     } catch (error) {
       log({
         severity: 'warn',

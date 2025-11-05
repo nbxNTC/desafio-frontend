@@ -4,25 +4,21 @@ import { getAuthSession } from './actions/auth'
 
 export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname
-  const publicAuthRoutes = ['/login', '/create-account']
-  const homeRoute = '/'
+  const privateRoutes = ['/upload']
+  const authRoutes = ['/login', '/create-account']
 
   // Check if user is logged in
   const session = await getAuthSession()
   const isAuthenticated = !!session
 
-  // Redirect logged-in users away from auth pages
-  if (publicAuthRoutes.some((publicRoute) => pathname.includes(publicRoute)) && isAuthenticated) {
-    return NextResponse.redirect(new URL(homeRoute, req.url))
+  // If user is logged in and tries to access auth routes, redirect to home
+  if (authRoutes.some((publicRoute) => pathname.includes(publicRoute)) && isAuthenticated) {
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
-  // Redirect non-logged-in users to login page
-  if (
-    pathname.includes('/app') &&
-    !publicAuthRoutes.some((publicRoute) => pathname.includes(publicRoute)) &&
-    !isAuthenticated
-  ) {
-    return NextResponse.redirect(new URL('/app/login', req.url))
+  // If user is not logged in and tries to access private routes, redirect to home
+  if (!isAuthenticated && privateRoutes.some((privateRoute) => pathname.includes(privateRoute))) {
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
   return NextResponse.next()

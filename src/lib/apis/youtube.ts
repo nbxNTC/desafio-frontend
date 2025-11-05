@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import { log } from '@/utils/logger'
+import { getAuthSession } from '@/actions/auth'
 
 /**
  * YouTube API configuration
@@ -31,6 +32,27 @@ export const youtubeApi: AxiosInstance = axios.create({
     key: GOOGLE_API_KEY
   }
 })
+
+/**
+ * Axios request interceptor to add access token from cookies
+ */
+youtubeApi.interceptors.request.use(
+  async (config) => {
+    try {
+      const session = await getAuthSession()
+      if (session?.accessToken) config.headers.Authorization = `Bearer ${session.accessToken}`
+    } catch (error) {
+      log({
+        severity: 'warn',
+        context: 'Google People API',
+        message: 'Failed to retrieve access token from cookies',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
 /**
  * Axios interceptor to handle YouTube API errors

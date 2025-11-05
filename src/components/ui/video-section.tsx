@@ -33,7 +33,7 @@ export function VideoSection({ title, description, data }: VideoSectionProps) {
 
       {/* Videos grid */}
       <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
-        {displayedItems.map((item) => {
+        {displayedItems.map((item, index) => {
           const { id, snippet } = item
 
           if (!snippet) return null
@@ -46,6 +46,9 @@ export function VideoSection({ title, description, data }: VideoSectionProps) {
 
           if (!thumbnail) return null
 
+          // Add priority to the first 4 images for better LCP
+          const isPriority = index < INITIAL_DISPLAY_COUNT
+
           return (
             <VideoCard
               key={id}
@@ -54,6 +57,7 @@ export function VideoSection({ title, description, data }: VideoSectionProps) {
               thumbnail={thumbnail}
               channelTitle={snippet.channelTitle}
               publishedAt={snippet.publishedAt}
+              priority={isPriority}
             />
           )
         })}

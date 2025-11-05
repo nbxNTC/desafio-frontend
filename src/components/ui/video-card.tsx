@@ -9,6 +9,7 @@ interface VideoCardProps {
   channelTitle?: string
   publishedAt?: string
   className?: string
+  priority?: boolean
 }
 
 /**
@@ -20,7 +21,8 @@ export function VideoCard({
   thumbnail,
   channelTitle,
   publishedAt,
-  className
+  className,
+  priority = false
 }: VideoCardProps) {
   return (
     <div
@@ -39,9 +41,10 @@ export function VideoCard({
           src={thumbnail}
           alt={title}
           fill
-          quality={75}
+          quality={60}
           className='object-cover'
           sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+          priority={priority}
         />
       </div>
 

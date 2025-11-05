@@ -112,3 +112,40 @@ export interface YouTubeVideosListResponse {
   }
   items: YouTubeVideo[]
 }
+
+// YouTube Video Upload Types
+export interface YouTubeVideoUploadSnippet {
+  title: string
+  description: string
+  categoryId: string
+  tags?: string[]
+  defaultLanguage?: string
+}
+
+export interface YouTubeVideoUploadStatus {
+  privacyStatus: 'public' | 'private' | 'unlisted'
+  embeddable?: boolean
+  license?: 'youtube' | 'creativeCommon'
+  publicStatsViewable?: boolean
+  publishAt?: string
+  selfDeclaredMadeForKids?: boolean
+}
+
+export interface YouTubeVideoUploadRequest {
+  snippet: YouTubeVideoUploadSnippet
+  status: YouTubeVideoUploadStatus
+}
+
+export interface YouTubeVideoUploadResponse {
+  kind: 'youtube#video'
+  etag: string
+  id: string
+  snippet: YouTubeVideoSnippet
+  status: {
+    uploadStatus: string
+    privacyStatus: string
+    license: string
+    embeddable: boolean
+    publicStatsViewable: boolean
+  }
+}
